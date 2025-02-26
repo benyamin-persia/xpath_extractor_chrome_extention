@@ -1,0 +1,40 @@
+#xpath-tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.9);
+    color: #fff;
+    padding: 8px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-family: Arial, sans-serif;
+    z-index: 9999;
+    pointer-events: none;
+    display: none;
+    max-width: 400px;
+    word-wrap: break-word;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  #xpath-text {
+    max-width: 350px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  
+  #copy-xpath-button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 3px 6px;
+    border-radius: 3px;
+    cursor: pointer;
+    pointer-events: all;
+    font-size: 14px;
+  }
+  
+  #copy-xpath-button:hover {
+    background: #0056b3;
+  }
+  
