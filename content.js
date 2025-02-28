@@ -81,33 +81,16 @@
     if (className && text) {
       let safeClass = escapeXPathLiteral(className);
       let safeText = escapeXPathLiteral(text);
-      candidates.push({ 
-        selector: `//${tag}[contains(@class, ${safeClass}) and contains(text(), ${safeText})]`, 
-        type: "xpath", 
-        label: "Relative XPath (contains)" 
-      });
-      candidates.push({ 
-        selector: `//${tag}[contains(@class, ${safeClass}) and normalize-space(text())=${safeText}]`, 
-        type: "xpath", 
-        label: "Relative XPath (normalize-space)" 
-      });
-      candidates.push({ 
-        selector: `//${tag}[contains(@class, ${safeClass}) and starts-with(text(), ${safeText})]`, 
-        type: "xpath", 
-        label: "Relative XPath (starts-with)" 
-      });
+      candidates.push({ selector: `//${tag}[contains(@class, ${safeClass}) and contains(text(), ${safeText})]`, type: "xpath", label: "Relative XPath (contains)" });
+      candidates.push({ selector: `//${tag}[contains(@class, ${safeClass}) and normalize-space(text())=${safeText}]`, type: "xpath", label: "Relative XPath (normalize-space)" });
+      candidates.push({ selector: `//${tag}[contains(@class, ${safeClass}) and starts-with(text(), ${safeText})]`, type: "xpath", label: "Relative XPath (starts-with)" });
     }
 
-    // ✅ ADDED: Generate a relative XPath if the element has an `href` attribute
     if (target.hasAttribute("href")) {
       let href = target.getAttribute("href").trim();
       if (href) {
         let safeHref = escapeXPathLiteral(href);
-        candidates.push({
-          selector: `//${tag}[@href=${safeHref}]`,
-          type: "xpath",
-          label: "Relative XPath (@href)"
-        });
+        candidates.push({ selector: `//${tag}[@href=${safeHref}]`, type: "xpath", label: "Relative XPath (@href)" });
       }
     }
 
@@ -115,10 +98,12 @@
     if (absXPath) {
       candidates.push({ selector: absXPath, type: "xpath", label: "Absolute XPath" });
     }
+
     let cssSel = getCssSelector(target);
     if (cssSel) {
       candidates.push({ selector: cssSel, type: "css", label: "CSS Selector" });
     }
+
     return candidates;
   }
 
@@ -152,6 +137,7 @@
           ${cand.selector}
         </span> - 
         <span style="color: #2ecc71; font-weight: bold;">count: ${count}</span>
+        <span class="copy-confirmation" style="display:none; color:#2ecc71;"> ✅</span>
       </li>`;
     });
     listHTML += "</ol>";
@@ -159,29 +145,30 @@
     tooltip.style.display = "block";
     tooltip.style.top = event.pageY + 10 + "px";
     tooltip.style.left = event.pageX + 10 + "px";
-  });
 
-  document.addEventListener("mousemove", function (event) {
-    if (!extensionEnabled) return;
-    if (!tooltipUpdateScheduled) {
-      tooltipUpdateScheduled = true;
-      requestAnimationFrame(() => {
-        tooltip.style.top = event.pageY + 10 + "px";
-        tooltip.style.left = event.pageX + 10 + "px";
-        tooltipUpdateScheduled = false;
+    // ✅ FIXED: Green Tick ✅ Now Works
+    const listItems = tooltip.querySelectorAll(".xpath-item");
+    listItems.forEach((item) => {
+      item.addEventListener("click", function () {
+        navigator.clipboard.writeText(item.getAttribute("data-selector")).then(() => {
+          let parentLi = item.closest("li");
+          let confirmMark = parentLi.querySelector(".copy-confirmation");
+          if (confirmMark) {
+            confirmMark.style.display = "inline";
+            setTimeout(() => {
+              confirmMark.style.display = "none";
+            }, 1500);
+          }
+        });
       });
-    }
+    });
   });
 
-  document.addEventListener("mouseout", function () {
-    if (!extensionEnabled || freezeTooltip) return;
-    tooltip.style.display = "none";
-    lastHoveredElement = null;
-  });
-
+  // ✅ FIXED: Control Key Freeze Works
   document.addEventListener("keydown", function (e) {
     if (e.key === "Control") {
       freezeTooltip = true;
+      console.log("Control key pressed, tooltip is now frozen.");
     }
   });
 
@@ -189,8 +176,9 @@
     if (e.key === "Control") {
       freezeTooltip = false;
       tooltip.style.display = "none";
+      console.log("Control key released, tooltip is now unfrozen.");
     }
   });
 
-  console.log("XPath Hover Helper Loaded");
+  console.log("XPath Hover Helper Loaded (Control Key Freeze & Green Tick ✅ Fixed)");
 });
